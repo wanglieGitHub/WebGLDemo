@@ -1,0 +1,118 @@
+<!DOCTYPE HTML> 
+<html> 
+<head> 
+<meta charset="utf-8" /> 
+<title>无标题文档</title> 
+<!--下面excanvas.js需下载才能在IE下支持canvas--> 
+<!--[if IE]> 
+<script src="http://a.tbcdn.cn/p/fp/2011a/html5.js"></script> 
+<script src="http://api.html5media.info/1.1.4/html5media.min.js"></script> 
+<script src="excanvas.js"></script> 
+<![endif]--> 
+<script type="text/javascript"> 
+window.onload = function(){ 
+var c=document.getElementById("canvas");
+c.width = 210;
+c.height = 210;
+
+
+              var context = c.getContext( '2d' );
+			  context.beginPath();
+			  context.moveTo(150,100);
+			  context.lineTo(50,150);
+			  context.lineTo(50,50);
+			  context.closePath();
+			  context.fill();
+			  /*
+              context.lineWidth = 10;
+              context.beginPath();
+			  context.arc(95,95,50,0,Math.PI*2);
+			  context.stroke();
+			  context.fillStyle = '#f0f0f0'; 
+			  context.fill();
+			  context.font = "bold 40pt Arial";  
+			  context.fillStyle = '#e74c3c';  
+			  context.textAlign = 'center';  
+			  context.textBaseline = 'middle';  
+			  context.moveTo(95, 95);  
+			  context.fillText(20, 95, 95); 
+			  //矩形标记序号
+			  context.fillStyle = '#f0f0f0';
+              context.fillRect(70,160,56,28);
+              context.shadowBlur=0;
+              context.font ='bold 20px Arial';
+              context.fillStyle = '#e74c3c';  
+              context.textAlign="center";
+              context.fillText(1,95,175);
+			  */
+              /*
+              var ctx=c.getContext("2d");
+              ctx.lineWidth = 0.5;
+              ctx.beginPath();
+              ctx.arc(100,100,50,0,2*Math.PI);
+              ctx.stroke();
+              ctx.font = "bold 20pt Arial";  
+              ctx.fillStyle = '#e74c3c';  
+              ctx.textAlign = 'center';  
+              ctx.textBaseline = 'middle';  
+              ctx.moveTo(100, 100);  
+              ctx.fillText('20', 100, 100); 
+
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(150,150,156,128);
+        ctx.shadowBlur=0;
+        ctx.font ='bold 20px Arial';
+        ctx.fillStyle = '#e74c3c';  
+        ctx.textAlign="center";
+        ctx.fillText(1,120,100);
+*/
+/*
+ctx.translate(-81, -84);
+
+            ctx.fillStyle = "orange";
+            ctx.beginPath();
+            ctx.moveTo(83, 116);
+            ctx.lineTo(83, 102);
+            ctx.bezierCurveTo(83, 94, 89, 88, 97, 88);
+            ctx.bezierCurveTo(105, 88, 111, 94, 111, 102);
+            ctx.lineTo(111, 116);
+            ctx.lineTo(106.333, 111.333);
+            ctx.lineTo(101.666, 116);
+            ctx.lineTo(97, 111.333);
+            ctx.lineTo(92.333, 116);
+            ctx.lineTo(87.666, 111.333);
+            ctx.lineTo(83, 116);
+            ctx.fill();
+
+            // the eyes
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.moveTo(91, 96);
+            ctx.bezierCurveTo(88, 96, 87, 99, 87, 101);
+            ctx.bezierCurveTo(87, 103, 88, 106, 91, 106);
+            ctx.bezierCurveTo(94, 106, 95, 103, 95, 101);
+            ctx.bezierCurveTo(95, 99, 94, 96, 91, 96);
+            ctx.moveTo(103, 96);
+            ctx.bezierCurveTo(100, 96, 99, 99, 99, 101);
+            ctx.bezierCurveTo(99, 103, 100, 106, 103, 106);
+            ctx.bezierCurveTo(106, 106, 107, 103, 107, 101);
+            ctx.bezierCurveTo(107, 99, 106, 96, 103, 96);
+            ctx.fill();
+
+            // the pupils
+            ctx.fillStyle = "blue";
+            ctx.beginPath();
+            ctx.arc(101, 102, 2, 0, Math.PI * 2, true);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(89, 102, 2, 0, Math.PI * 2, true);
+            ctx.fill();
+			*/
+} 
+</script> 
+</head> 
+ 
+<body> 
+<canvas id="canvas" ></canvas> 
+</body> 
+</html>

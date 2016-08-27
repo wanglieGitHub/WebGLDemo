@@ -1,0 +1,576 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SelectionSort</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            margin: 0px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+        .menu-div
+        {
+            position:relative;
+            float: right;
+            margin-left: 0px;
+            margin-right: 2px;
+            margin-top: 2px;
+            font-family: Helvetica;
+            color: floralwhite;
+            overflow:hidden;
+            text-align: center;
+        }
+        .div-hiden
+        {
+            display: none;
+        }
+        .div-small
+        {
+            position: relative;
+            float: right;
+            top:330px;
+        }
+        .imge
+        {
+            width: 20px;
+            height: 20px;
+            margin-left: 5px;
+        }
+        p
+        {
+            text-align: left;
+            padding-left: 15px;
+            padding-right: 15px;
+            margin-top: 10px;
+            font-size: 15px;
+        }
+        .pseCodeDiv
+        {
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-top: 10px;
+            text-align: left;
+            font-size: 15px;
+        }
+    </style>
+    <script src="js/three.min.js"></script>
+    <script src="js/Projector.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <script src="js/CanvasRenderer.js"></script>
+</head>
+<body>
+<!--弹出框-->
+<table style="position:absolute;right: 1px">
+    <tr>
+        <td>
+            <div class="div-small">
+                <div style="background-color: #00b3ee;width: 20px;height: 60px" class="menu-div" onclick="move('explain')">
+                    <img src="img/zhedie.svg" class="imge" style="padding-top: 20px">
+                </div>
+                <div style="background-color: #00b3ee;width: 20px;height: 60px" class="menu-div div-hiden" id="explain">
+
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="div-small">
+                <div style="background-color: #ec971f;width: 20px;height: 230px" class="menu-div" onclick="move('Pseudocode')">
+                    <img src="img/zhedie.svg" class="imge" style="padding-top: 100px">
+                </div>
+                <div style="background-color: #ec971f;width: 20px;height: 230px" class="menu-div div-hiden" id="Pseudocode">
+
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<script>
+    //弹窗控制
+    function move(id) {
+        if ($("#"+id).css("display")!="none")
+        {
+            $("#"+id).animate({width:"0px"},close(id));
+        }else
+        {
+            $("#"+id).animate({width:"400px"},open(id));
+        }
+    }
+    function close(id) {
+        $("#"+id).addClass("div-hiden");
+    }
+    function open(id) {
+        $("#"+id).removeClass("div-hiden");
+    }
+</script>
+<script>
+    var container;
+    var camera, scene, renderer;
+    var cube, plane;
+    //数组个数初始化
+    var num = 0;
+    //排序结果记录数组
+    var selectArray ;
+    //记录排序详细变化
+    var changeArray;
+    //算法步骤
+    var s = -1;
+    //数组值初始化，由于dat-gui控件无法绑定数组，所以定义为字符串。用的时候转化为字符串
+    var strRadArray = '1,2,3,4,5,6';
+    //获取界面的宽度
+    var width;
+    init();
+    ConfigGui();
+    //cube();
+    animate();
+
+
+    //=----------------------算法区-----------------------
+    //选择排序
+    //----------------------------------------------
+    //             算法思想
+    //1.从未排序数列中找出最大或最小的元素，放在排序序列的起始位置
+    //2.再从剩余未排序数列中找出最大或最小的元素，放在已排序序列的末尾
+    //3.重复上述过程
+    //
+    //
+    //记录数组：i,j,minIndex,isSwap,arr
+    //--------------------------------------------------
+      function selectionSort(array)
+	  {
+	    var length = array.length,
+		    i,
+			j,
+			minIndex,
+			minValue,
+			temp;
+			selectArray = new Array();//记录数组
+			var arrInfo = new Array();//连接数组
+		for(i=0;i<length-1;i++)
+		{
+		   minIndex = i;
+		   minValue = array[minIndex];
+		   for(j=i+1;j<length;j++)
+		   {
+		     selectArray.push(arrInfo.concat(0,i,j,minIndex,array));
+		     if(array[j]<minValue)
+			 {
+			   minIndex = j;
+			   minValue = array[minIndex];
+			   selectArray.push(arrInfo.concat(1,i,j,minIndex,array));
+			 }
+		   }
+		   //交换位置
+		   temp = array[i];
+		   array[i] = minValue;
+		   array[minIndex] = temp;
+		   selectArray.push(arrInfo.concat(2,i,j,minIndex,array));
+		}
+	  }
+    //------------------逻辑控制类方法-------------------------------------------
+    //界面控制器
+    function ConfigGui() {
+        var configs = new  function () {
+            this.ArrayNum = 6;
+            this.Array=strRadArray;
+            //随机生成数组1-50
+            this.Random =  function () {
+                var radArray = new Array();
+                while(radArray.length<this.ArrayNum)
+                {
+                    var rdnum = parseInt(Math.random()*49+1);
+                    if($.inArray(rdnum,radArray)== -1)//判断数组中是否已经存在
+                    {
+                        radArray.push(rdnum );
+                    }
+                }
+                this.Array=radArray.join();//将数组转化成字符串
+            }
+            //按照数组创建立方体
+            this.Start = function () {
+                //打开弹窗控件
+                move('explain');
+                move('Pseudocode');
+                //清空画布
+                removeObject();
+                //清空解释说明部分
+                $('#explain').empty();
+                //清空步骤计数器
+                s=-1;
+                //生成方块
+                var  arrayData = this.Array.split(",");
+                var  len =  arrayData.length;
+                var  k=0;
+                for (var i = -len/2;i<len/2;i++) {
+                    cube(i, arrayData[k],'blue');
+                    k++;
+                }
+                selectionSort(stringToInt(arrayData));
+            }
+            this.NextStep = function () {
+                //清空画布
+                removeObject();
+                //增加步骤
+                s++;
+				//对记录数组进行拆分
+				if(s<=selectArray.length-1)
+				{
+				   var isSwap = selectArray[s][0];//判断标志
+				   var e = selectArray[s][1];//已排序数列的末尾位置
+				   var f = selectArray[s][2];//未排序数列的起始位置
+				   var m = selectArray[s][3];//未排序数列中的最小元素
+				   var arrayData = selectArray[s].slice(4);//排序结果记录数组
+				}else
+				{
+				   var  arrayData = selectArray[selectArray.length-1].slice(4);
+				}
+				var len = arrayData.length;
+				var k=0;
+				for (var i = -len/2;i<len/2;i++) {
+                    if(isSwap!=2)
+					{
+					  if(k<e)
+					  {
+					    cube(i,arrayData[k],'green');
+					  }else if(k==m)
+					  {
+					    cube(i,arrayData[k],'red');
+					  }else if(k==f)
+					  {
+					    cube(i,arrayData[k],'orange');
+					  }else
+					  {
+					    cube(i,arrayData[k],'blue');
+					  }
+					}else
+					{
+					  if(e<len-2)
+					  {
+					    if(k<e)
+					    {
+					      cube(i,arrayData[k],'green');
+					    }else if(k==e)
+					    {
+					      cube(i,arrayData[k],'red');
+					    }else if(k==f)
+					    {
+					      cube(i,arrayData[k],'orange');
+					    }else
+					    {
+					      cube(i,arrayData[k],'blue');
+					    } 
+					    }else
+					    {
+					      cube(i,arrayData[k],'blue');
+					    }
+					}					
+                    k++;
+                }
+				//生成伪代码
+				var  pseCode= '<div id="first" class="pseCodeDiv">set the first unsorted element as the minimum</div>';
+				pseCode=pseCode+'<div id="second" class="pseCodeDiv">for each of the unsorted elements</div>';
+				pseCode=pseCode+'<div id="third" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp if element < currentMinimum</div>';
+				pseCode=pseCode+'<div id="forth" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp set element as new minimum</div>';
+				pseCode=pseCode+'<div id="fifth" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp swap minimum with first unsorted position</div>';
+				$('#Pseudocode').html(pseCode);
+				//生成解释说明，并控制伪代码显示
+				switch(isSwap)
+				{
+				  case 0:
+				     var explainCode = '<p>将'+arrayData[m]+'设置为最小值，然后从未排序数列中找到真正的最小值</p>';
+					 $('#first').css('background','#0c0c0c');
+					 $('#second').css('background','#0c0c0c');
+					 break;
+				  case 1:
+				     var explainCode = '<p>比较'+arrayData[m]+'是否比最小值小，如是，将其设置为最小值	</p>';
+					 $('#third').css('background','#0c0c0c');
+					 $('#forth').css('background','#0c0c0c');
+					 break;
+				  case 2:
+				     var explainCode = '<p>将最小值'+arrayData[m]+'与第一个未排序的元素'+arrayData[i]+'交换位置</p>';
+					 $('#fifth').css('background','#0c0c0c');
+					 break;
+				}
+				 $('#explain').html(explainCode);
+            }
+            this.LastStep = function () {
+                if(s==-1)
+                {
+                    return;
+                }
+                s--;
+                //清空画布
+                removeObject();
+				//对记录数组进行拆分
+				if(s<=selectArray.length-1)
+				{
+				   var isSwap = selectArray[s][0];//判断标志
+				   var e = selectArray[s][1];//已排序数列的末尾位置
+				   var f = selectArray[s][2];//未排序数列的起始位置
+				   var m = selectArray[s][3];//未排序数列中的最小元素
+				   var arrayData = selectArray[s].slice(4);//排序结果记录数组
+				}else
+				{
+				   var  arrayData = selectArray[selectArray.length-1].slice(4);
+				}
+				var len = arrayData.length;
+				var k=0;
+				for (var i = -len/2;i<len/2;i++) {
+                    if(isSwap!=2)
+					{
+					  if(k<e)
+					  {
+					    cube(i,arrayData[k],'green');
+					  }else if(k==m)
+					  {
+					    cube(i,arrayData[k],'red');
+					  }else if(k==f)
+					  {
+					    cube(i,arrayData[k],'orange');
+					  }else
+					  {
+					    cube(i,arrayData[k],'blue');
+					  }
+					}else
+					{
+					  if(e<len-2)
+					  {
+					    if(k<e)
+					    {
+					      cube(i,arrayData[k],'green');
+					    }else if(k==e)
+					    {
+					      cube(i,arrayData[k],'red');
+					    }else if(k==f)
+					    {
+					      cube(i,arrayData[k],'orange');
+					    }else
+					    {
+					      cube(i,arrayData[k],'blue');
+					    } 
+					    }else
+					    {
+					      cube(i,arrayData[k],'blue');
+					    }
+					}					
+                    k++;
+                }
+				//生成伪代码
+				var  pseCode= '<div id="first" class="pseCodeDiv">set the first unsorted element as the minimum</div>';
+				pseCode=pseCode+'<div id="second" class="pseCodeDiv">for each of the unsorted elements</div>';
+				pseCode=pseCode+'<div id="third" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp if element < currentMinimum</div>';
+				pseCode=pseCode+'<div id="forth" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp set element as new minimum</div>';
+				pseCode=pseCode+'<div id="fifth" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp swap minimum with first unsorted position</div>';
+				$('#Pseudocode').html(pseCode);
+				//生成解释说明，并控制伪代码显示
+				switch(isSwap)
+				{
+				  case 0:
+				     var explainCode = '<p>将'+arrayData[m]+'设置为最小值，然后从未排序数列中找到真正的最小值</p>';
+					 $('#first').css('background','#0c0c0c');
+					 $('#second').css('background','#0c0c0c');
+					 break;
+				  case 1:
+				     var explainCode = '<p>比较'+arrayData[m]+'是否比最小值小，如是，将其设置为最小值	</p>';
+					 $('#third').css('background','#0c0c0c');
+					 $('#forth').css('background','#0c0c0c');
+					 break;
+				  case 2:
+				     var explainCode = '<p>将最小值'+arrayData[m]+'与第一个未排序的元素'+arrayData[i]+'交换位置</p>';
+					 $('#fifth').css('background','#0c0c0c');
+					 break;
+				}
+				 $('#explain').html(explainCode);
+            }
+        }
+        var  gui = new  dat.GUI();
+        var f1 = gui.addFolder('CreateArray');
+        f1.add(configs,'ArrayNum');
+        f1.add(configs,'Random');
+        f1.add(configs,'Array').listen();
+        var f2 = gui.addFolder('mergeSort');
+        f2.add(configs,'Start');
+        f2.add(configs,'NextStep');
+        f2.add(configs,'LastStep');
+        f1.open();
+    }
+    //---------------------控制类方法-----------------------------
+    // 将string类型数组"arrayData"转化为int 类型数组
+    function stringToInt(arrayData) {
+        var array = [];
+        for(var i=0;i<arrayData.length;i++)
+        {
+            array[i]=parseInt(arrayData[i]);
+        }
+        return array;
+    }
+    //移除物体
+    function removeObject() {
+        var allChildren = scene.children;
+        while(allChildren.length>4)
+        {
+            var lastObject = allChildren[allChildren.length - 1];
+            if(lastObject instanceof THREE.Object3D)
+            {
+                scene.remove(lastObject);
+            }
+        }
+    }
+    //颜色控制
+    function controlColor(cubeColor) {
+        switch (cubeColor)
+        {
+            case'blue':
+                return({color:0x00b3ee,colorRgba:'rgba(0, 179, 238,0.5)'});
+                break;
+            case 'red':
+                return({color:0xff3399,colorRgba:'rgba(255, 51, 153,0.5)'});
+                break;
+            case 'orange':
+                return({color:0xff9900,colorRgba:'rgba(255, 153, 0,0.5)'});
+                break;
+            case 'yellow':
+                return({color:0xffff00,colorRgba:'rgba(255, 255, 0,1)'});
+                break;
+            case'green':
+                return({color:0x33CC00,colorRgba:'rgba(51, 204, 0,0.5)'});
+                break;
+            case 'purple':
+                return({color:0xcc33ff,colorRgba:'rgba(204, 51, 255,0.5)'});
+                break;
+        }
+    }
+    //-----------------工具类方法-----------------------------
+    function init() {
+        container = document.createElement( 'div' );
+        document.body.appendChild( container );
+        //场景
+        scene = new THREE.Scene();
+        //相机
+        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
+        camera.position.x = 0;
+        camera.position.y = 10;
+        camera.position.z = 150;
+        camera.lookAt(scene.position);
+        //渲染器
+        renderer = new THREE.WebGLRenderer({antialias:true});
+        renderer.setClearColor( 0xf0f0f0 );
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.shadowMapEnabled = true;
+        container.appendChild( renderer.domElement );
+        //地板
+        var planeGeometry = new THREE.PlaneGeometry(500,500);
+        var planeMaterial =   new THREE.MeshLambertMaterial({
+            color: 0xa0adaf,
+            ambient: 0x555555,
+            specular: 0xdddddd,
+            shininess: 5,
+            reflectivity: 2
+        });
+        //设置地板的参数
+        plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.x = 15;
+        plane.position.y = 0;
+        plane.position.z = 0;
+        plane.receiveShadow = true;
+        scene.add(plane);
+        //自然光线
+        scene.add( new THREE.AmbientLight( 0x505050 ) );
+
+        //侧光
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(0, 60, 40);
+        scene.add(spotLight);
+
+        //聚光
+        var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        //directionalLight.castShadow = true;
+        directionalLight.position.set(0, 10, 0);
+        scene.add(directionalLight);
+
+        //控制进行了一些角度和镜头伸缩方面的设置，限制了用户把画面翻转到平面的底部，也保证了镜头在伸缩时不会太远及太近。
+        var orbitControls  = new THREE.OrbitControls( camera, renderer.domElement );
+        orbitControls.minDistance = 50;
+        orbitControls.maxDistance = 200;
+        orbitControls.maxPolarAngle = 1.5;
+        orbitControls.noPan = true;
+        //界面宽度
+        width = container.clientWidth;
+    }
+    function cube(i,data,cubeColor) {
+        basicCube(i,data,cubeColor);
+        var color = controlColor(cubeColor);
+        var geometry = new THREE.CubeGeometry( 5,-1*data,5);
+        var materialArray =[];
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 1,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 1,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 1,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 1,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 1,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 1,color:color.color}));
+        var faceMaterial = new THREE.MeshFaceMaterial(materialArray);
+        var cube = new  THREE.Mesh(geometry,faceMaterial);
+        cube.position.x = 10*i;
+        cube.position.y = 5;
+        cube.position.z = -2.5;
+        cube.castShadow = true;
+        scene.add( cube );
+    }
+    //该立方体用来显示数字
+    function basicCube(i,data,cubeColor,isfar) {
+        //颜色
+        var color = controlColor(cubeColor);
+        //材质
+        var canvas = document.createElement("canvas");
+        canvas.width = 256;
+        canvas.height = 128;
+        var context = canvas.getContext( '2d' );
+        //context.fillStyle='rgba(255, 0, 204,0.5)';
+        context.fillStyle = color.colorRgba;
+        context.fillRect(0,0,256,128);
+        //context.shadowColor = 'rgba(255,255,255,1)';
+        context.shadowBlur=0;
+        context.font ='bold 100px Arial';
+        context.fillStyle = 'rgba(255,255,255,0.75)';
+        context.textAlign="center";
+        context.fillText(data,120,100);
+        //创建物体
+        var geometry = new THREE.CubeGeometry( 5,5,5);
+        //将材质转换成纹理
+        var canvasMap = new THREE.Texture(canvas);
+        //将纹理贴在物体上
+        var materialArray =[];
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 1,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 1,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 1,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 1,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({map:canvasMap}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 1,color:color.color}));
+        var faceMaterial = new THREE.MeshFaceMaterial(materialArray);
+        var cube = new  THREE.Mesh(geometry,faceMaterial);
+        cube.material.materials[4].map.needsUpdate = true;
+        cube.position.x = 10*i;
+        cube.position.y = 2.5;
+        cube.position.z = -2.5;
+        cube.castShadow = true;
+        scene.add( cube );
+    }
+    function animate() {
+        requestAnimationFrame( animate );
+        render();
+    }
+    function render() {
+        renderer.render( scene, camera );
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../js/three.min.js"></script>
+    <script src="../js/Projector.js"></script>
+    <script src="../js/stats.min.js"></script>
+    <script src="../js/OrbitControls.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/dat.gui.min.js"></script>
+    <style>
+        body {
+            margin: 0px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+<!--监视器-->
+<div id="stats-output" style="position: absolute;z-index: 100"></div>
+<div id="container"></div>
+<script>
+    var camera, scene, renderer;
+    //步骤计数
+    var  k=0;
+    //数组个数初始化
+    var num = 0;
+    //数组值初始化，由于dat-gui控件无法绑定数组，所以定义为字符串。用的时候转化为字符串
+    var strRadArray = '1,2,3';
+    var  dis=0;
+    init();
+    //ConfigGui();
+    CreateCube01();
+    CreateCube02();
+    animate();
+    function init() {
+        //场景
+        scene = new THREE.Scene();
+        //相机
+        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight , 1 , 4000 );//设置透视投影的相机,默认情况下相机的上方向为Y轴，右方向为X轴，沿着Z轴朝里（视野角：fov 纵横比：aspect 相机离视体积最近的距离：near 相机离视体积最远的距离：far）
+        camera.position.z =  150;;//设置相机的位置坐标
+
+        camera.lookAt( {x:0, y:0, z:0 } );//设置视野的中心坐标
+        ////渲染器
+        renderer = new THREE.WebGLRenderer({antialias:true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor( 0xf0f0f0 );
+        renderer.setPixelRatio( window.devicePixelRatio );
+        document.getElementById('container').appendChild(renderer.domElement);//追加渲染器到 【container】 元素中。
+
+        //性能监视器
+        stats = new Stats();
+        document.getElementById("stats-output").appendChild(stats.domElement);
+        //控制
+        var controls = new THREE.OrbitControls( camera, renderer.domElement );
+        controls.target.set( 0, 0, 5 );//设置中心点
+        controls.update();
+    }
+    //界面控制器
+    function ConfigGui() {
+        //界面组件
+        var configs = new function () {
+            this.ArrayNum = 3;
+            this.Array=strRadArray;
+            //随机生成数组1-50
+            this.Random =  function () {
+                var radArray = new Array();
+                while(radArray.length<this.ArrayNum)
+                {
+                    var rdnum = parseInt(Math.random()*49+1);
+                    if($.inArray(rdnum,radArray)== -1)//判断数组中是否已经存在
+                    {
+                        radArray.push(rdnum );
+                    }
+                }
+                this.Array=radArray.join();//将数组转化成字符串
+            }
+            //按照数组创建方块
+            this.Start = function () {
+                var i;
+                var  arrayData = this.Array.split(",");
+                removeObject();
+                for(i=0;i<arrayData.length;i++)
+                {
+                    CreateCube(i,-1,arrayData[i],'red');
+                }
+            }
+            //控制步骤
+            this.NextStep = function () {
+                var sortArray = bubbleSort(this.Array);
+
+                var sortArrayData = sortArray[k].split(",");
+                for(var i=0;i<sortArrayData.length-2;i++)
+                {
+                    if(i==sortArrayData[sortArrayData.length-2]||i==sortArrayData[sortArrayData.length-1])
+                    {
+                        CreateCube(i,k,sortArrayData[i],'green');
+                    }
+                    CreateCube(i,k,sortArrayData[i],'red');
+                }
+                k++;
+            }
+        }
+        var  gui = new  dat.GUI();
+        var f1 = gui.addFolder('CreateArray');
+        f1.add(configs,'ArrayNum');
+        f1.add(configs,'Random');
+        f1.add(configs,'Array').listen();
+        var f2 = gui.addFolder('ControlSort');
+        f2.add(configs,'Start');
+        f2.add(configs,'NextStep');
+        f1.open();
+    }
+    /*
+    //设置物体
+    function CreateCube(x,y,text,cubeColor) {
+        //颜色
+        var color = controlColor(cubeColor);
+        //材质
+        var canvas = document.createElement("canvas");
+        canvas.width = 256;
+        canvas.height = 128;
+        var context = canvas.getContext( '2d' );
+        context.fillStyle=color.colorRgb;
+        context.fillRect(0,0,256,128);
+        //context.shadowColor = 'rgba(255,255,255,1)';
+        context.shadowBlur=10;
+        context.font ='100px Arial';
+        context.fillStyle = 'rgba(255,255,255,0.75)';
+        context.textAlign="center";
+        context.fillText(text,120,100);
+        //创建物体
+        var geometry = new THREE.CubeGeometry( 10,10,10);
+        //将材质转换成纹理
+        var canvasMap = new THREE.Texture(canvas);
+        //将纹理贴在物体上
+        var materialArray =[];
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:color.color}));
+        materialArray.push(new THREE.MeshBasicMaterial({map:canvasMap}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:color.color}));
+        var faceMaterial = new THREE.MeshFaceMaterial(materialArray);
+        var cube = new  THREE.Mesh(geometry,faceMaterial);
+        cube.material.materials[4].map.needsUpdate = true;
+        cube.position.x=-30+20*x;
+        cube.position.y=40-20*(y+1);
+        cube.position.z=10;
+        scene.add( cube );
+    }
+     */
+    //设置物体
+    function CreateCube01() {
+        //材质
+        var canvas = document.createElement("canvas");
+        canvas.width = 256;
+        canvas.height = 128;
+        var context = canvas.getContext( '2d' );
+        context.fillStyle='rgba(255, 0, 204,0.5)';
+        context.fillRect(0,0,256,128);
+        //context.shadowColor = 'rgba(255,255,255,1)';
+        context.shadowBlur=10;
+        context.font ='100px Arial';
+        context.fillStyle = 'rgba(255,255,255,0.75)';
+        context.textAlign="center";
+        context.fillText('10',120,100);
+        //创建物体
+        var geometry = new THREE.CubeGeometry( 10,10,10);
+        //将材质转换成纹理
+        var canvasMap = new THREE.Texture(canvas);
+        //将纹理贴在物体上
+        var materialArray =[];
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:0xff00cc}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:0xff00cc}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:0xff00cc}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:0xff00cc}));
+        materialArray.push(new THREE.MeshBasicMaterial({map:canvasMap}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:0xff00cc}));
+        var faceMaterial = new THREE.MeshFaceMaterial(materialArray);
+        var cube = new  THREE.Mesh(geometry,faceMaterial);
+        cube.material.materials[4].map.needsUpdate = true;
+        cube.position.x=0;
+        cube.position.y=40;
+        cube.position.z=10;
+        scene.add( cube );
+    }
+    function CreateCube02() {
+        //材质
+        var canvas = document.createElement("canvas");
+        canvas.width = 256;
+        canvas.height = 128;
+        var context = canvas.getContext( '2d' );
+        context.fillStyle='rgba(255, 0, 204,0.5)';
+        context.fillRect(0,0,256,128);
+        //context.shadowColor = 'rgba(255,255,255,1)';
+        context.shadowBlur=10;
+        context.font ='100px Arial';
+        context.fillStyle = 'rgba(255,255,255,0.75)';
+        context.textAlign="center";
+        context.fillText('12',120,100);
+        //创建物体
+        var geometry = new THREE.CubeGeometry( 10,10,10);
+        //将材质转换成纹理
+        var canvasMap = new THREE.Texture(canvas);
+        //将纹理贴在物体上
+        var materialArray =[];
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:0xff00cc}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:0xff00cc}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:0xff00cc}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:0xff00cc}));
+        materialArray.push(new THREE.MeshBasicMaterial({map:canvasMap}));
+        materialArray.push(new THREE.MeshBasicMaterial({transparent: true,opacity: 0.5,color:0xff00cc}));
+        var faceMaterial = new THREE.MeshFaceMaterial(materialArray);
+        var cube = new  THREE.Mesh(geometry,faceMaterial);
+        cube.material.materials[4].map.needsUpdate = true;
+        cube.position.x=-20;
+        cube.position.y=40;
+        cube.position.z=10;
+        scene.add( cube );
+    }
+
+
+    //移除物体
+    function removeObject() {
+        var allChildren = scene.children;
+        while(allChildren.length>0)
+        {
+            var lastObject = allChildren[allChildren.length - 1];
+            if(lastObject instanceof THREE.Object3D)
+            {
+                scene.remove(lastObject);
+            }
+        }
+    }
+    //冒泡排序，并记录信息
+    function bubbleSort(array) {
+        var i,j;
+        var bubArrary = new Array();
+        var arrayData = array.split(',');
+        for(i=0;i<arrayData.length-1;i++) {
+            for (j = 0; j < arrayData.length - i - 1; j++) {
+                var position = new Array(j,j+1);
+                if(arrayData[j]>arrayData[j+1])
+                {
+                    var temp = arrayData[j];
+                    arrayData[j] = arrayData[j+1];
+                    arrayData[j+1] = temp;
+                    bubArrary.push(arrayData.concat(position).join(","));
+                }else
+                {
+                    bubArrary.push(arrayData.concat(position).join(","));
+                }
+            }
+        }
+        return bubArrary;
+    }
+    //颜色控制
+    function controlColor(cubeColor) {
+        switch (cubeColor)
+        {
+            case'green':
+                return({color:0x32cd32,colorRgb:'rgba(50,205,50,0.5)'});
+                break;
+            case 'red':
+                return({color:0xff00cc,colorRgb:'rgba(255, 0, 204,0.5)'});
+                break;
+        }
+    }
+
+    function animate() {
+        var allChildren = scene.children;
+        dis -=1;
+        allChildren[0].position.x=dis;
+        if (dis>allChildren[1].position.x)
+        {
+            requestAnimationFrame( animate );
+        }
+        stats.begin();
+        render();
+        stats.end();
+    }
+    function render() {
+        renderer.render(scene, camera);
+    }
+</script>
+</body>
+</html>

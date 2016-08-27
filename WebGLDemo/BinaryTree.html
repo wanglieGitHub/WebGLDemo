@@ -1,0 +1,630 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+   <title>BinaryTree</title>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+   <style>
+        body {
+            font-family: Monospace;
+            background-color: #f0f0f0;
+            margin: 0px;
+            overflow: hidden;
+        }
+		.menu-div
+        {
+            position:relative;
+            float: right;
+            margin-left: 0px;
+            margin-right: 2px;
+            margin-top: 2px;
+            font-family: Helvetica;
+            color: floralwhite;
+            overflow:hidden;
+            text-align: center;
+        }
+        .div-hiden
+        {
+            display: none;
+        }
+        .div-small
+        {
+            position: relative;
+            float: right;
+            top:330px;
+        }
+        .imge
+        {
+            width: 20px;
+            height: 20px;
+            margin-left: 5px;
+        }
+        p
+        {
+            text-align: left;
+            padding-left: 15px;
+            padding-right: 15px;
+            margin-top: 10px;
+            font-size: 15px;
+        }
+		.pseCodeDiv
+        {
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-top: 10px;
+            text-align: left;
+            font-size: 15px;
+        }
+    </style>
+	<script>
+    //弹窗控制
+    function move(id) {
+        if ($("#"+id).css("display")!="none")
+        {
+            $("#"+id).animate({width:"0px"},close(id));
+        }else
+        {
+            $("#"+id).animate({width:"400px"},open(id));
+        }
+    }
+    function close(id) {
+        $("#"+id).addClass("div-hiden");
+    }
+    function open(id) {
+        $("#"+id).removeClass("div-hiden");
+    }
+    </script>
+	<script src="js/jquery.min.js"></script>
+    <script src="js/three.min.js"></script>
+    <script src="js/Projector.js"></script>
+    <script src="js/CanvasRenderer.js"></script>
+	<script src="js/dat.gui.min.js"></script>
+</head>
+<body>
+<!--弹出框--------------------------------------------->
+<table style="position:absolute;right: 1px">
+    <tr>
+        <td>
+            <div class="div-small">
+                <div style="background-color: #00b3ee;width: 20px;height: 60px" class="menu-div" onclick="move('explain')">
+                    <img src="img/zhedie.svg" class="imge" style="padding-top: 20px">
+                </div>
+                <div style="background-color: #00b3ee;width: 20px;height: 60px" class="menu-div div-hiden" id="explain">
+
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="div-small">
+                <div style="background-color: #ec971f;width: 20px;height: 230px" class="menu-div" onclick="move('Pseudocode')">
+                    <img src="img/zhedie.svg" class="imge" style="padding-top: 100px">
+                </div>
+                <div style="background-color: #ec971f;width: 20px;height: 230px" class="menu-div div-hiden" id="Pseudocode">
+
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+
+    <script>
+		var container;
+		var camera, scene, renderer;
+		var mouseX = 0;
+		var mouseY = 0;
+		var PI2 = Math.PI * 2;
+		var windowHalfX = window.innerWidth / 2;
+		var windowHalfY = window.innerHeight / 2;
+		init();
+		ConfigGui();
+		animate();
+        
+		function init()
+		{
+		    //画布
+		    container = document.createElement( 'div' );
+		    document.body.appendChild( container );
+			//相机
+			camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+			camera.position.z = 1000;
+			//场景
+			scene = new THREE.Scene();
+			//灯光
+			scene.add( new THREE.AmbientLight( 0x505050 ) );
+			//地板
+			var separation = 150;
+			var amountx = 10;
+			var amounty = 10;
+			var material = new THREE.SpriteCanvasMaterial({
+			    color: 0x0000000,
+				program: function ( context ){
+				    context.beginPath();
+					context.arc( 0, 0, 0.6, 0, PI2, true );
+					context.fill();
+				}
+			});
+			var group = new THREE.Object3D();
+			for ( var ix = 0; ix < amountx; ix++ ) {
+
+				for ( var iy = 0; iy < amounty; iy++ ) {
+
+					particle = new THREE.Sprite( material );
+					particle.position.x = ix * separation - ( ( amountx * separation ) / 2 );
+					particle.position.y = -153;
+					particle.position.z = iy * separation - ( ( amounty * separation ) / 2 );
+					particle.scale.x = particle.scale.y = 2;
+					group.add(particle);
+					scene.add( group );
+
+				}
+
+			}
+            //渲染器
+            renderer = new THREE.CanvasRenderer();
+			renderer.setClearColor( 0xf0f0f0 );
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			container.appendChild( renderer.domElement );
+			//监听
+			document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+            //
+            window.addEventListener( 'resize', onWindowResize, false );			
+		}
+	    //界面控制器
+		function ConfigGui()
+		{
+		   var configs = new  function ()
+		   {
+		     this.ExampleBTree = function()
+			 {
+			    //画圆环
+			    var particle01=circle(0,260,0,20,1,'black');
+			    var particle02=circle(-150,160,0,18,2,'black');
+				var particle03=circle(150,160,0,27,3,'black');
+				var particle04=circle(-250,60,0,4,4,'black');
+				var particle05=circle(-40,60,0,19,5,'black');
+				var particle06=circle(50,60,0,22,6,'black');
+				var particle07=circle(250,60,0,29,7,'black');
+				var particle08=circle(-350,-60,0,2,8,'black');
+				var particle09=circle(-150,-60,0,9,9,'black');
+				//var particle10=circle(250,60,0,29);
+				//画线
+				var geometry01 = new THREE.Geometry();
+				var geometry02 = new THREE.Geometry();
+				var geometry03 = new THREE.Geometry();
+				var geometry04 = new THREE.Geometry();
+				var geometry05 = new THREE.Geometry();
+				var geometry06 = new THREE.Geometry();
+				var geometry07 = new THREE.Geometry();
+				var geometry08 = new THREE.Geometry();
+				geometry01.vertices.push(particle01.position);
+			    geometry01.vertices.push(particle02.position);
+				
+                geometry02.vertices.push(particle01.position);
+			    geometry02.vertices.push(particle03.position);
+				
+				geometry03.vertices.push(particle02.position);
+			    geometry03.vertices.push(particle04.position);
+				
+				geometry04.vertices.push(particle03.position);
+			    geometry04.vertices.push(particle06.position);
+				
+				geometry05.vertices.push(particle03.position);
+			    geometry05.vertices.push(particle07.position);
+				
+				geometry06.vertices.push(particle02.position);
+			    geometry06.vertices.push(particle05.position);
+				
+				geometry07.vertices.push(particle04.position);
+			    geometry07.vertices.push(particle08.position);
+				
+				geometry08.vertices.push(particle04.position);
+			    geometry08.vertices.push(particle09.position);
+				line(geometry01);
+				line(geometry02);
+				line(geometry03);
+                line(geometry04);
+				line(geometry05);
+				line(geometry06);
+				line(geometry07);
+				line(geometry08);
+			 }
+			 //调整最大堆
+			 this.BuildMaxHeap = function()
+			 {
+			    removeObject();
+			    //画圆环
+			    var particle01=circle(0,260,0,20,1,'black');
+			    var particle02=circle(-150,160,0,18,2,'black');
+				var particle03=circle(150,160,0,27,3,'black');
+				var particle04=circle(-250,60,0,9,4,'blue');
+				var particle05=circle(-40,60,0,19,5,'black');
+				var particle06=circle(50,60,0,22,6,'black');
+				var particle07=circle(250,60,0,29,7,'black');
+				var particle08=circle(-350,-60,0,2,8,'black');
+				var particle09=circle(-150,-60,0,4,9,'blue',1);
+				//var particle10=circle(250,60,0,29);
+				//画线
+				var geometry01 = new THREE.Geometry();
+				var geometry02 = new THREE.Geometry();
+				var geometry03 = new THREE.Geometry();
+				var geometry04 = new THREE.Geometry();
+				var geometry05 = new THREE.Geometry();
+				var geometry06 = new THREE.Geometry();
+				var geometry07 = new THREE.Geometry();
+				var geometry08 = new THREE.Geometry();
+				geometry01.vertices.push(particle01.position);
+			    geometry01.vertices.push(particle02.position);
+				
+                geometry02.vertices.push(particle01.position);
+			    geometry02.vertices.push(particle03.position);
+				
+				geometry03.vertices.push(particle02.position);
+			    geometry03.vertices.push(particle04.position);
+				
+				geometry04.vertices.push(particle03.position);
+			    geometry04.vertices.push(particle06.position);
+				
+				geometry05.vertices.push(particle03.position);
+			    geometry05.vertices.push(particle07.position);
+				
+				geometry06.vertices.push(particle02.position);
+			    geometry06.vertices.push(particle05.position);
+				
+				geometry07.vertices.push(particle04.position);
+			    geometry07.vertices.push(particle08.position);
+				
+				geometry08.vertices.push(particle04.position);
+			    geometry08.vertices.push(particle09.position);
+				line(geometry01);
+				line(geometry02);
+				line(geometry03);
+                line(geometry04);
+				line(geometry05);
+				line(geometry06);
+				line(geometry07);
+				line(geometry08);
+				//生成伪代码
+				var  pseCode= '<div id="first" class="pseCodeDiv">将调用maxHeapify()方法自下而上调整堆</div>';
+				pseCode=pseCode+'<div id="second" class="pseCodeDiv">var index = Array.length/2</div>';
+				pseCode=pseCode+'<div id="third" class="pseCodeDiv">for (i = index; i >= 1; i--)</div>';
+				pseCode=pseCode+'<div id="forth" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp while (i > 1 && Array[parent(i)] < Array[i])</div>';
+				pseCode=pseCode+'<div id="fifth" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp swap(Array[i], Array[parent(i)])</div>';
+				$('#Pseudocode').html(pseCode);
+				//生成解释说明，并控制伪代码显示
+				var explainCode = '<p>比较元素4和9的大小，如4>9则交换二者位置，否则不交换</p>';
+				$('#forth').css('background','#0c0c0c');
+				$('#fifth').css('background','#0c0c0c');
+				$('#explain').html(explainCode);
+			 }
+			 this.removeBTree = function()
+			 {
+			    removeObject();
+			 }
+             //
+			 this.Array = '20,18,27,4,19,22,29,2,9';
+			 this.Create = function()
+			 {
+			    removeObject();
+			    //画圆
+			    var particle01=circle(0,260,0,20,1,'blue',1);
+			    var particle02=circle(-150,160,0,18,2,'black');
+				var particle03=circle(150,160,0,27,3,'blue',1);
+				//画线
+				var geometry01 = new THREE.Geometry();
+				var geometry02 = new THREE.Geometry();
+				geometry01.vertices.push(particle01.position);
+			    geometry01.vertices.push(particle02.position);
+				
+                geometry02.vertices.push(particle01.position);
+			    geometry02.vertices.push(particle03.position);
+				line(geometry01);
+				line(geometry02);
+				//生成伪代码
+				var  pseCode= '<div id="first" class="pseCodeDiv">将每个数组元素插入空二叉树中相应位置，并调整为最大堆</div>';
+				pseCode=pseCode+'<div id="second" class="pseCodeDiv">for (i = 0; i < Array.length; i++)</div>';
+				pseCode=pseCode+'<div id="third" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp while (i > 1 && Array[parent(i)] < Array[i])</div>';
+				pseCode=pseCode+'<div id="forth" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp swap(Array[i], Array[parent(i)])</div>';
+				$('#Pseudocode').html(pseCode);
+				//生成解释说明，并控制伪代码显示
+				var explainCode = '<p>将元素27插入堆中，并比较27和20的大小，如果大于则交换二者的位置</p>';
+				$('#third').css('background','#0c0c0c');
+				$('#forth').css('background','#0c0c0c');
+				$('#explain').html(explainCode);
+			 };
+			 //
+			 this.Element = 30;
+			 this.Go = function()
+			 {
+			    removeObject();
+			    //画圆环
+			    var particle01=circle(0,260,0,20,1,'black');
+			    var particle02=circle(-150,160,0,18,2,'black');
+				var particle03=circle(150,160,0,27,3,'blue',1);
+				var particle04=circle(-250,60,0,9,4,'black');
+				var particle05=circle(-40,60,0,19,5,'black');
+				var particle06=circle(50,60,0,22,6,'black');
+				var particle07=circle(250,60,0,29,7,'blue',1);
+				//画线
+				var geometry01 = new THREE.Geometry();
+				var geometry02 = new THREE.Geometry();
+				var geometry03 = new THREE.Geometry();
+				var geometry04 = new THREE.Geometry();
+				var geometry05 = new THREE.Geometry();
+				var geometry06 = new THREE.Geometry();
+
+				geometry01.vertices.push(particle01.position);
+			    geometry01.vertices.push(particle02.position);
+				
+                geometry02.vertices.push(particle01.position);
+			    geometry02.vertices.push(particle03.position);
+				
+				geometry03.vertices.push(particle02.position);
+			    geometry03.vertices.push(particle04.position);
+				
+				geometry04.vertices.push(particle03.position);
+			    geometry04.vertices.push(particle06.position);
+				
+				geometry05.vertices.push(particle03.position);
+			    geometry05.vertices.push(particle07.position);
+				
+				geometry06.vertices.push(particle02.position);
+			    geometry06.vertices.push(particle05.position);
+				
+				
+				line(geometry01);
+				line(geometry02);
+				line(geometry03);
+                line(geometry04);
+				line(geometry05);
+				line(geometry06);
+				//生成伪代码
+				var  pseCode= '<div id="first" class="pseCodeDiv">var i = Array.length-1</div>';
+				pseCode=pseCode+'<div id="second" class="pseCodeDiv">while (i > 1 && Array[parent(i)] < Array[i])</div>';
+				pseCode=pseCode+'<div id="third" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp swap(Array[i], Array[parent(i)])</div>';
+				$('#Pseudocode').html(pseCode);
+				//生成解释说明，并控制伪代码显示
+				var explainCode = '<p>将元素29插入堆中，并比较29和27的大小，如果大于则交换二者的位置</p>';
+				$('#second').css('background','#0c0c0c');
+				$('#third').css('background','#0c0c0c');
+				$('#explain').html(explainCode);
+			 };
+			 //
+			 this.nextStep = function()
+			 {
+			    //画圆环
+			    var particle01=circle(0,260,0,29,1,'blue',1);
+			    var particle02=circle(-150,160,0,19,2,'black');
+				var particle03=circle(150,160,0,27,3,'black');
+				var particle04=circle(-250,60,0,9,4,'black');
+				var particle05=circle(-40,60,0,18,5,'black');
+				var particle06=circle(50,60,0,22,6,'black');
+				var particle07=circle(250,60,0,20,7,'black');
+				var particle08=circle(-350,-60,0,2,8,'black');
+				var particle09=circle(-150,-60,0,4,9,'black');
+				//var particle10=circle(250,60,0,29);
+				//画线
+				var geometry01 = new THREE.Geometry();
+				var geometry02 = new THREE.Geometry();
+				var geometry03 = new THREE.Geometry();
+				var geometry04 = new THREE.Geometry();
+				var geometry05 = new THREE.Geometry();
+				var geometry06 = new THREE.Geometry();
+				var geometry07 = new THREE.Geometry();
+				var geometry08 = new THREE.Geometry();
+				geometry01.vertices.push(particle01.position);
+			    geometry01.vertices.push(particle02.position);
+				
+                geometry02.vertices.push(particle01.position);
+			    geometry02.vertices.push(particle03.position);
+				
+				geometry03.vertices.push(particle02.position);
+			    geometry03.vertices.push(particle04.position);
+				
+				geometry04.vertices.push(particle03.position);
+			    geometry04.vertices.push(particle06.position);
+				
+				geometry05.vertices.push(particle03.position);
+			    geometry05.vertices.push(particle07.position);
+				
+				geometry06.vertices.push(particle02.position);
+			    geometry06.vertices.push(particle05.position);
+				
+				geometry07.vertices.push(particle04.position);
+			    geometry07.vertices.push(particle08.position);
+				
+				geometry08.vertices.push(particle04.position);
+			    geometry08.vertices.push(particle09.position);
+				line(geometry01);
+				line(geometry02);
+				line(geometry03);
+                line(geometry04);
+				line(geometry05);
+				line(geometry06);
+				line(geometry07);
+				line(geometry08);
+				//生成伪代码
+				var  pseCode= '<div id="first" class="pseCodeDiv">take out Array[0]</div>';
+				pseCode=pseCode+'<div id="second" class="pseCodeDiv">Array[0]=Array[Array.length]</div>';
+				pseCode=pseCode+'<div id="third" class="pseCodeDiv">i = 0;Array.length--</div>';
+				pseCode=pseCode+'<div id="third" class="pseCodeDiv">while (i < Array.length)</div>';
+				pseCode=pseCode+'<div id="third" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspif Array[i]< the larger children of i</div>';
+				pseCode=pseCode+'<div id="third" class="pseCodeDiv">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp swap(Array[i], Array[parent(i)])</div>';
+				$('#Pseudocode').html(pseCode);
+				//生成解释说明，并控制伪代码显示
+				var explainCode = '<p>将元素29移除堆中，并将最后一个元素4移到空位置</p>';
+				$('#second').css('background','#0c0c0c');
+				$('#third').css('background','#0c0c0c');
+				$('#explain').html(explainCode);
+			 }
+			 this.lastStep = function(){}
+			
+		   }
+		    var gui = new  dat.GUI();
+			var f1 = gui.addFolder('Example');
+			f1.add(configs,'ExampleBTree');
+			f1.add(configs,'BuildMaxHeap');
+			f1.add(configs,'removeBTree');
+            var f2 = gui.addFolder('CreateMaxHeap');
+			f2.add(configs,'Array');
+			f2.add(configs,'Create');
+			var f3 = gui.addFolder('Insert');
+			f3.add(configs,'Element');
+			f3.add(configs,'Go');
+            var f4 = gui.addFolder('HeapSort');
+			f4.add(configs,'nextStep');
+			f4.add(configs,'lastStep');
+			
+            f1.open();
+		}
+		//画圆环
+		function circle(x,y,z,data,num,color,isChange)
+		{
+		      var color = controlColor(color);
+			  var particleGeometry = new THREE.CircleGeometry(40,120);
+		      //圆环画图
+		      var canvas = document.createElement("canvas");
+			  canvas.width = 210;
+              canvas.height = 210;
+              var context = canvas.getContext( '2d' );
+              context.lineWidth = 15;
+              context.beginPath();
+			  context.arc(95,95,50,0,Math.PI*2);
+			  context.strokeStyle = color.colorRgba;
+			  context.stroke();
+			  if(isChange != undefined)
+			  {
+			    context.fillStyle = '#00b3ee'; 
+			  }else
+			  {
+			     context.fillStyle = '#f0f0f0'; 
+			  }
+			  context.fill();
+			  context.font = "bold 40pt Arial";  
+			  context.fillStyle = '#000000';  
+			  context.textAlign = 'center';  
+			  context.textBaseline = 'middle';  
+			  context.moveTo(95, 95);  
+			  context.fillText(data, 95, 95); 
+			  //矩形标记序号
+			  context.fillStyle = '#f0f0f0';
+              context.fillRect(70,160,56,28);
+              context.shadowBlur=0;
+              context.font ='bold 50px Arial';
+              context.fillStyle = '#e74c3c';  
+              context.textAlign="center";
+              context.fillText(num,95,175);
+			  
+			  //转换为材质
+			  var canvasMap = new THREE.Texture(canvas);
+			  var particleMaterial = new THREE.MeshBasicMaterial({map:canvasMap,color:0xf0f0f0,opacity: 1});
+			  particleMaterial.wireframe = true;
+			  //构造Mesh
+			  
+			  var particle = new  THREE.Mesh(particleGeometry,particleMaterial);
+			  particle.material.map.needsUpdate = true;
+			  particle.position.x = x;
+			  particle.position.y = y;
+			  particle.position.z = z;
+			  
+			  scene.add( particle );
+			  return particle;
+		}
+		//画线
+		function line(geometry)
+		{
+			var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( {color: 0x000000,linewidth:2,opacity: 1} ) );
+			scene.add( line );
+		}
+		    //移除物体
+        function removeObject() {
+            var allChildren = scene.children;
+            while(allChildren.length>2)
+            {
+                var lastObject = allChildren[allChildren.length - 1];
+                if(lastObject instanceof THREE.Object3D)
+                {
+                   scene.remove(lastObject);
+                }
+            }
+        }
+		//----------------------监听事件--------------------------------------------
+		function onWindowResize() {
+
+			windowHalfX = window.innerWidth / 2;
+			windowHalfY = window.innerHeight / 2;
+
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+
+			renderer.setSize( window.innerWidth, window.innerHeight );
+
+		}
+		function onDocumentMouseDown( event ){
+			    
+			document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+			document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+			document.addEventListener( 'mouseout', onDocumentMouseOut, false );
+		}
+		function onDocumentMouseMove( event ) {
+
+			mouseX = ( event.clientX - windowHalfX );
+			mouseY = ( event.clientY - windowHalfY ) * 0.2;
+
+		}
+		function onDocumentMouseUp( event )
+		{
+			document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+		    document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+			document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+		}
+		function onDocumentMouseOut( event )
+		{
+			document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+		    document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+			document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+		}
+		//----------颜色控制--------------------------------------------------
+		function controlColor(ccolor) {
+            switch (ccolor)
+            {
+                case'blue':
+                    return({color:0x00b3ee,colorRgba:'rgba(0, 179, 238,1)'});
+                    break;
+                case 'red':
+                    return({color:0xff00cc,colorRgba:'rgba(255, 0, 204,1)'});
+                    break;
+                case 'yellow':
+                    return({color:0xec971f,colorRgba:'rgba(236, 151, 31,1)'});
+					break;
+			    case 'black':
+				    return ({color:0x000000,colorRgba:'rgba(0, 0, 0,1)'});
+					break;
+				case 'orange':
+                    return({color:0xff9900,colorRgba:'rgba(255, 153, 0,1)'});
+					break;
+            }
+        }
+		//----------------------------------------------------------------------------
+		function animate() {
+            requestAnimationFrame( animate );
+            render();
+		}
+		function render() {
+                
+			camera.position.x += ( mouseX - camera.position.x ) * 1;
+			camera.position.y += ( - mouseY - camera.position.y ) * 1;
+			camera.lookAt( scene.position );
+				
+			renderer.render( scene, camera );
+
+		}
+
+    </script>
+
+</body>
+</html>

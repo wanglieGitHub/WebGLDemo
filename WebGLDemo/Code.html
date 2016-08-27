@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>在线编辑</title>
+
+    <link href="css/codemirror.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/show-hint.css" rel="stylesheet">
+
+    <script src="js/codemirror.js"></script>
+    <script src="js/three.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/javascript.js"></script>
+    <script src="js/show-hint.js"></script>
+    <script src="js/javascript-hint.js"></script>
+    <script src="js/ball.js"></script>
+    <script src="js/Bubble.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+
+    <style>
+        .left1
+        {
+            float: left;
+            width: 40%;
+            height: auto;
+        }
+        .left2
+        {
+            float: left;
+            width: 56%;
+            height: auto;
+            margin-left: 2%;
+        }
+        .h3
+        {
+            display: inline;
+        }
+    </style>
+    <script>
+        var CodeMirrorEditor;
+      $(document).ready(function () {
+          var myTextarea = document.getElementById('editor');
+          CodeMirrorEditor = CodeMirror.fromTextArea(myTextarea, {
+              mode: "text/javascript",
+              lineNumbers: true,
+              extraKeys:{"Ctrl":"autocomplete"}
+          });
+          CodeMirrorEditor.setValue("canvas3D()");
+          /*
+          CodeMirrorEditor.on("changes",function () {
+              CodeMirrorEditor.showHint();
+          });
+          */
+      });
+      function Start() {
+          var  code = CodeMirrorEditor.getValue();
+          $("#container").load("graphical.html");
+      }
+    </script>
+</head>
+<body>
+
+     <!--代码编辑区-->
+     <div class="left1">
+         <!--标题-->
+         <table width="100%">
+                <th>
+                    <h3>Code:</h3>
+                </th>
+                <th >
+                     <div style="float: right;margin-top: 10px;margin-right: 3px">
+					      Normal <input type="checkbox">
+					      Simplify <input type="checkbox">
+                          <input type="button"  class="btn btn-success" value="运行" onclick="Start()">
+                     </div>
+                </th>
+            </table>
+         <!--代码区-->
+         <div style="border:1px #DEDEDE solid;">
+                <textarea id="editor"  ></textarea>
+            </div>
+     </div>
+     <!--结果显示区-->
+     <div class="left2">
+         <!--标题-->
+         <div>
+             <h3>Graph:</h3>
+         </div>
+         <!--显示区-->
+         <!--盛放canvas的容器-->
+         <div id="container" style="border:1px #DEDEDE solid; height: 570px" >
+
+         </div>
+     </div>
+</body>
+</html>
